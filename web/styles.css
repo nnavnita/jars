@@ -1,0 +1,894 @@
+/* Reenie Beanie, SIL Open Font License. Served from this origin, so the app
+ * still works offline and makes no third-party requests. Only the Latin subset
+ * is bundled — about 18KB. */
+@font-face {
+  font-family: "Reenie Beanie";
+  src: url("ReenieBeanie.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  /* Show the fallback immediately rather than invisible text on a cold load. */
+  font-display: swap;
+}
+
+/* jars — Sky Nursery.
+ *
+ * One deliberate light theme. The palette is the identity here, and a dark
+ * inversion of very pale pastels reads as a different app rather than the same
+ * app at night, so there's no dark variant on purpose.
+ *
+ * --paper, --ink and --note are set from palette.rs at startup; the literals
+ * below are only fallbacks for the first paint.
+ */
+
+:root {
+  --paper: #fafbf8;
+  --ink: #64708c;
+  --note: #fdf3dc;
+  --ink-soft: color-mix(in srgb, var(--ink) 55%, var(--paper));
+  --ink-faint: color-mix(in srgb, var(--ink) 16%, var(--paper));
+  --danger: #a4616b;
+  /* Cardboard. Outside the jar palette on purpose — a box is not a jar. */
+  --card: #ded;
+  --card-face: #e2cba8;
+  --card-flap: #ecdabd;
+  --card-edge: #8d7250;
+  --card-seam: #c3a781;
+  /* Recycling bin. */
+  --bin-body: #9fb6a4;
+  --bin-lid: #8aa48f;
+  --bin-edge: #5d7564;
+  /* Shelf timber. Warm enough to read as wood without fighting the pastels. */
+  --shelf-wood: #e6d6bd;
+  --shelf-edge: #b1946f;
+  /* Handwriting, from fonts the OS already has — nothing is downloaded, so the
+     app still works offline and ships no font files. Coverage is good on macOS,
+     iOS and Windows; elsewhere this lands on the generic `cursive`, which
+     varies. Bundling an open-licensed face (Caveat, Patrick Hand) is the fix if
+     consistency matters more than a zero-byte font budget. */
+  --hand: "Reenie Beanie", "Bradley Hand", "Noteworthy", "Segoe Print",
+          "Chalkboard SE", "Comic Sans MS", cursive;
+  --sans: var(--hand);
+  --display: var(--hand);
+  --radius: 14px;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--hand);
+  /* Reenie Beanie has a small x-height and thin strokes, so everything is set
+     noticeably larger than it would be in a UI sans. */
+  font-size: 1.28rem;
+  -webkit-font-smoothing: antialiased;
+  overscroll-behavior-y: contain;
+}
+
+body {
+  min-height: 100svh;
+  padding: env(safe-area-inset-top) env(safe-area-inset-right)
+           env(safe-area-inset-bottom) env(safe-area-inset-left);
+}
+
+.page {
+  max-width: 34rem;
+  margin: 0 auto;
+  padding: 0 1.15rem 6rem;
+}
+
+/* ---------- header ---------- */
+
+.bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 1.5rem 0 1rem;
+}
+
+.bar h1 {
+  font-family: var(--display);
+  font-weight: 400;
+  font-size: 2rem;
+  letter-spacing: 0.02em;
+  margin: 0;
+}
+
+.jartitle {
+  font-family: var(--display);
+  font-weight: 400;
+  font-size: 1.18rem;
+  letter-spacing: 0.03em;
+  margin: 0;
+  text-align: center;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.spacer { width: 3.4rem; }
+
+/* ---------- shelf ---------- */
+
+.shelf {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(8.4rem, 1fr));
+  column-gap: 0;
+  /* The plank is painted on the list itself, not on each cell, so it runs the
+     full width of the shelf whether the row is full or holds a single jar.
+     That needs fixed-height rows for the repeat to line up. */
+  --row-h: 13rem;
+  --plank-h: 0.5rem;
+  --ticket-h: 1.5rem;
+  grid-auto-rows: var(--row-h);
+  row-gap: 0;
+  background-image: repeating-linear-gradient(
+    to bottom,
+    transparent 0,
+    transparent calc(var(--row-h) - var(--plank-h) - var(--ticket-h)),
+    var(--shelf-edge) calc(var(--row-h) - var(--plank-h) - var(--ticket-h)),
+    var(--shelf-edge) calc(var(--row-h) - var(--plank-h) - var(--ticket-h) + 2px),
+    var(--shelf-wood) calc(var(--row-h) - var(--plank-h) - var(--ticket-h) + 2px),
+    var(--shelf-wood) calc(var(--row-h) - var(--ticket-h)),
+    transparent calc(var(--row-h) - var(--ticket-h)),
+    transparent var(--row-h)
+  );
+}
+
+.shelf li {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  /* Room under the plank for the count to sit, like a shelf ticket. */
+  padding-bottom: calc(var(--ticket-h) + var(--plank-h));
+}
+
+/* A soft contact shadow so the jars sit on the timber rather than hover. */
+.shelf li::before {
+  content: "";
+  position: absolute;
+  left: 18%;
+  right: 18%;
+  bottom: calc(var(--ticket-h) + var(--plank-h));
+  height: 0.45rem;
+  background: radial-gradient(ellipse at center, color-mix(in srgb, var(--ink) 26%, transparent), transparent 72%);
+  pointer-events: none;
+}
+
+.jarcard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.1rem;
+  width: 100%;
+  padding: 0.5rem 0.3rem 0;
+  background: none;
+  border: 0;
+  border-radius: var(--radius);
+  color: inherit;
+  cursor: pointer;
+  transition: transform 160ms ease, background 160ms ease;
+}
+
+.jarcard:hover { background: var(--ink-faint); transform: translateY(-2px); }
+.jarcard:active { transform: translateY(0) scale(0.985); }
+
+.thumb {
+  width: 100%;
+  height: auto;
+  display: block;
+  user-select: none;
+}
+
+.jarcount {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  font-size: 0.95rem;
+  color: var(--ink-soft);
+  letter-spacing: 0.02em;
+}
+
+/* ---------- the jar you're drawing from ---------- */
+
+.jarstage { display: flex; flex-direction: column; align-items: center; }
+
+.jarcanvas {
+  width: 100%;
+  max-width: 17rem;
+  aspect-ratio: 200 / 230;
+  display: block;
+  touch-action: manipulation;
+}
+
+.count {
+  margin: 0.1rem 0 0;
+  font-size: 1.02rem;
+  color: var(--ink-soft);
+  letter-spacing: 0.03em;
+}
+
+/* ---------- controls ---------- */
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  justify-content: center;
+  align-items: center;
+  margin: 1.4rem 0 0.4rem;
+}
+
+button, .file {
+  font: inherit;
+  font-size: 1.12rem;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: transform 120ms ease, background 140ms ease, opacity 140ms ease;
+}
+
+button:active:not(:disabled) { transform: scale(0.97); }
+
+.primary {
+  background: var(--ink);
+  color: var(--paper);
+  border: 2px solid var(--ink);
+  padding: 0.62rem 1.5rem;
+}
+
+.primary.big { padding: 0.85rem 2.4rem; font-size: 1.04rem; }
+.primary:disabled { opacity: 0.4; cursor: default; }
+
+.ghost {
+  background: transparent;
+  color: var(--ink);
+  border: 2px solid color-mix(in srgb, var(--ink) 35%, var(--paper));
+  padding: 0.55rem 1.1rem;
+}
+
+.ghost:hover:not(:disabled) { border-color: var(--ink); }
+.ghost.danger, .link.danger { color: var(--danger); border-color: color-mix(in srgb, var(--danger) 40%, var(--paper)); }
+
+.link {
+  background: none;
+  border: 0;
+  font-size: 1.08rem;
+  padding: 0.3rem 0.2rem;
+  color: var(--ink-soft);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.link:hover { color: var(--ink); }
+.link.danger { text-decoration-color: var(--danger); border: 0; }
+
+/* A file input styled as a button; the input itself stays reachable but unseen. */
+.file { position: relative; overflow: hidden; display: inline-flex; align-items: center;
+        border: 2px solid color-mix(in srgb, var(--ink) 35%, var(--paper));
+        padding: 0.55rem 1.1rem; }
+.file input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+
+.field {
+  font: inherit;
+  font-size: 1.18rem;
+  color: var(--ink);
+  background: var(--paper);
+  border: 2px solid color-mix(in srgb, var(--ink) 30%, var(--paper));
+  border-radius: var(--radius);
+  padding: 0.6rem 0.85rem;
+  min-width: 0;
+  flex: 1;
+}
+
+.field::placeholder { color: color-mix(in srgb, var(--ink) 45%, var(--paper)); }
+.field:focus { outline: 2px solid var(--ink); outline-offset: 1px; border-color: transparent; }
+
+.addrow { display: flex; gap: 0.5rem; margin: 2.2rem 0 0; }
+
+.jarmenu {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+  margin-top: 2rem;
+  font-size: 1.04rem;
+}
+
+.confirm { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; justify-content: center;
+           font-size: 1.04rem; color: var(--ink-soft); text-align: center; }
+
+/* ---------- the reveal ---------- */
+
+.reveal-backdrop {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 1.5rem;
+  background: color-mix(in srgb, var(--paper) 90%, var(--ink));
+  backdrop-filter: blur(3px);
+  perspective: 900px;
+  z-index: 20;
+}
+
+/* The note unfolds toward you, hinged along its crease. */
+.reveal {
+  background: var(--note);
+  border: 2px solid var(--ink);
+  border-radius: 6px;
+  padding: 2.4rem 1.7rem 1.4rem;
+  max-width: 22rem;
+  width: 100%;
+  text-align: center;
+  box-shadow: 0 14px 34px -18px color-mix(in srgb, var(--ink) 70%, transparent);
+  transform-origin: center top;
+  /* The stamp is positioned against this. */
+  position: relative;
+  animation: unfold 420ms cubic-bezier(0.22, 1.1, 0.36, 1) both;
+}
+
+/* Opens at the hinge first, then flattens out — two beats, like real paper. */
+@keyframes unfold {
+  0%   { transform: rotateX(-86deg) scaleY(0.52); opacity: 0; }
+  55%  { transform: rotateX(-12deg) scaleY(0.88); opacity: 1; }
+  100% { transform: rotateX(0) scaleY(1); opacity: 1; }
+}
+
+.notetext {
+  font-family: var(--display);
+  font-size: 1.5rem;
+  font-weight: 450;
+  line-height: 1.5;
+  margin: 0 0 1.6rem;
+  color: color-mix(in srgb, var(--ink) 88%, #000);
+}
+
+.choices {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: center;
+  /* The note is still hinging open and the buttons are still moving. Arming
+     them early means a tap lands where a button *was*. */
+  opacity: 0;
+  pointer-events: none;
+  animation: choices-in 140ms ease 400ms forwards;
+}
+
+@keyframes choices-in {
+  to { opacity: 1; pointer-events: auto; }
+}
+
+/* Once an outcome is chosen the buttons go at once, so nothing is clickable
+   while the note is animating away. */
+.reveal.going .choices {
+  animation: none;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* ---- back in jar: folds itself up again ---- */
+
+.reveal.back { animation: fold 400ms cubic-bezier(0.5, 0, 0.75, 0.4) forwards; }
+
+@keyframes fold {
+  0%   { transform: rotateX(0) scaleY(1); opacity: 1; }
+  45%  { transform: rotateX(-20deg) scaleY(0.84); opacity: 1; }
+  100% { transform: rotateX(-88deg) scaleY(0.46) translateY(-12px); opacity: 0; }
+}
+
+/* ---- trash: crushed in a fist, then dropped ---- */
+
+/* A `transform` can only squash a rectangle smoothly — that reads as a
+   shrinking card, never as paper being crushed. Animating `clip-path` moves
+   each vertex independently, so the silhouette itself buckles inward at
+   irregular points, which is what crushing actually looks like. The twelve
+   points stay matched across every keyframe, which is what makes the shape
+   interpolable at all. */
+.reveal.trash {
+  border-color: transparent;
+  animation: crush 620ms cubic-bezier(0.35, 0, 0.7, 0.45) forwards;
+  /* The border is clipped away with everything else, so the edge comes from a
+     shadow that hugs whatever shape the clip leaves behind. */
+  filter: drop-shadow(0 1px 0.5px color-mix(in srgb, var(--ink) 55%, transparent));
+}
+
+@keyframes crush {
+  0% {
+    clip-path: polygon(0% 0%, 25% 0%, 50% 0%, 75% 0%, 100% 0%, 100% 50%,
+                       100% 100%, 75% 100%, 50% 100%, 25% 100%, 0% 100%, 0% 50%);
+    transform: scale(1, 1) rotate(0);
+  }
+  /* First grab: the edges buckle but the sheet is still broadly flat. */
+  30% {
+    clip-path: polygon(8% 14%, 29% 3%, 51% 15%, 73% 2%, 93% 16%, 87% 49%,
+                       91% 85%, 71% 97%, 47% 85%, 27% 98%, 9% 83%, 14% 47%);
+    transform: scale(0.82, 0.92) rotate(-6deg);
+  }
+  /* Closing fist: deep folds, the paper losing its plane. */
+  62% {
+    clip-path: polygon(22% 27%, 38% 17%, 55% 28%, 68% 15%, 80% 31%, 74% 51%,
+                       79% 72%, 62% 83%, 46% 71%, 33% 85%, 22% 68%, 27% 49%);
+    transform: scale(0.52, 0.72) rotate(9deg);
+  }
+  /* A tight, lumpy ball — deliberately not a circle. */
+  100% {
+    clip-path: polygon(37% 40%, 44% 34%, 51% 39%, 58% 33%, 63% 41%, 64% 50%,
+                       61% 59%, 54% 64%, 48% 60%, 42% 65%, 37% 58%, 35% 49%);
+    transform: scale(0.24, 0.46) rotate(29deg) translateY(170px);
+    opacity: 0;
+  }
+}
+
+/* The writing disappears into the folds almost immediately. */
+.reveal.trash .notetext { animation: ink-away 170ms ease-out forwards; }
+
+@keyframes ink-away {
+  to { opacity: 0; }
+}
+
+/* Creases and shading, fading in as the paper balls up. Without these the
+   silhouette deforms but the surface stays flat and papery-looking. */
+.reveal.trash::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+  background:
+    linear-gradient(118deg, transparent 45.4%, color-mix(in srgb, var(--ink) 38%, transparent) 46.2%, transparent 47%),
+    linear-gradient(27deg, transparent 57.2%, color-mix(in srgb, var(--ink) 32%, transparent) 58%, transparent 58.8%),
+    linear-gradient(72deg, transparent 30.4%, color-mix(in srgb, var(--ink) 26%, transparent) 31.1%, transparent 31.8%),
+    linear-gradient(145deg, transparent 64.3%, color-mix(in srgb, var(--ink) 24%, transparent) 65%, transparent 65.7%),
+    linear-gradient(98deg, transparent 71.4%, color-mix(in srgb, var(--ink) 20%, transparent) 72%, transparent 72.6%),
+    radial-gradient(circle at 36% 34%, transparent 30%, color-mix(in srgb, var(--ink) 28%, transparent) 100%);
+  animation: creases 620ms ease-in forwards;
+}
+
+@keyframes creases {
+  0%   { opacity: 0; }
+  35%  { opacity: 0.9; }
+  100% { opacity: 0.9; }
+}
+
+/* ---- done: stamped, then lifted away ---- */
+
+.stamp {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  font-family: var(--display);
+  font-weight: 800;
+  font-size: clamp(1.8rem, 9vw, 2.6rem);
+  letter-spacing: 0.18em;
+  text-indent: 0.18em;
+  color: var(--danger);
+  border: 5px solid var(--danger);
+  border-radius: 8px;
+  padding: 0.08em 0.26em 0.12em;
+  opacity: 0;
+  pointer-events: none;
+  /* Multiply lets the paper show through, the way real ink would. */
+  mix-blend-mode: multiply;
+  animation: stamp 720ms cubic-bezier(0.2, 1.5, 0.4, 1) forwards;
+}
+
+/* Lands hard and overshoots a touch, like something pressed down by hand. */
+@keyframes stamp {
+  0%   { opacity: 0; transform: translate(-50%, -50%) rotate(-17deg) scale(3); }
+  20%  { opacity: 0.9; transform: translate(-50%, -50%) rotate(-12deg) scale(0.97); }
+  28%  { transform: translate(-50%, -50%) rotate(-12deg) scale(1.06); }
+  36%  { transform: translate(-50%, -50%) rotate(-12deg) scale(1); }
+  100% { opacity: 0.9; transform: translate(-50%, -50%) rotate(-12deg) scale(1); }
+}
+
+.reveal.done { animation: stamped-away 720ms ease-in forwards; }
+
+@keyframes stamped-away {
+  0%, 58% { transform: none; opacity: 1; }
+  72%     { transform: translateY(-5px) scale(1.02); opacity: 1; }
+  100%    { transform: translateY(-30px) scale(0.95); opacity: 0; }
+}
+
+/* ---------- the jar's handwritten label ---------- */
+
+.jarart {
+  position: relative;
+  display: block;
+  width: 100%;
+  /* The label is a percentage of this box, so this must be the element that
+     carries the size cap. Capping the <img> instead leaves the wrapper wider
+     than the artwork and the label hangs off the glass. */
+  max-width: 7.4rem;
+  margin: 0 auto;
+}
+
+/* Sits over the jar's body, matching where the label is in the artwork.
+   Slightly crooked, because a square label looks printed rather than stuck on. */
+.jarlabel {
+  position: absolute;
+  left: 50%;
+  top: 48.7%;
+  transform: translate(-50%, -50%) rotate(-2.5deg);
+  width: 38%;
+  min-height: 13%;
+  display: grid;
+  place-items: center;
+  padding: 0.1em 0.15em;
+  background: #fdfaf2;
+  border: 1px solid color-mix(in srgb, var(--ink) 34%, transparent);
+  font-size: 0.86rem;
+  line-height: 1.05;
+  text-align: center;
+  color: color-mix(in srgb, var(--ink) 92%, #000);
+  overflow: hidden;
+  overflow-wrap: anywhere;
+}
+
+/* These scenes set their own jar size, so the shelf cap comes off. */
+.box .jarart,
+.flyingjar .jarart {
+  max-width: none;
+}
+
+/* In the box scene the jar is the thing you're working on, so it's drawn much
+   larger — but the label still has to sit *on* the jar. The body spans roughly
+   26.5%-73.5% of the artwork's width, so anything past ~40% hangs off the
+   glass. Long names scroll inside the field rather than widening it. */
+.box .jarlabel {
+  width: 39%;
+  min-height: 15%;
+  font-size: 1.05rem;
+}
+
+.box .scribble { font-size: 1.05rem; }
+
+/* ---------- a new jar comes out of a box ---------- */
+
+.boxscene {
+  position: fixed;
+  inset: 0;
+  z-index: 25;
+  display: grid;
+  place-items: center;
+  /* The jar rises above the box, so leave headroom or it clips off the top. */
+  padding: 5rem 1rem 1rem;
+  background: var(--paper);
+}
+
+/* The scene stays until you confirm — the label is written on it. */
+
+/* The prompt and buttons appear only once the jar is clear of the box. */
+.boxask {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 220ms ease;
+}
+
+.boxask.ready {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+@keyframes scene-out {
+  to { opacity: 0; }
+}
+
+.box {
+  position: relative;
+  width: 19rem;
+  height: 16rem;
+}
+
+/* The jar sits behind the box's front face, so it reads as coming out of it
+   rather than floating in front. */
+.box .newjar {
+  position: absolute;
+  left: 50%;
+  bottom: 3.4rem;
+  display: block;
+  width: 8.4rem;
+  z-index: 2;
+  opacity: 0;
+  animation: jar-rises 640ms cubic-bezier(0.3, 1.12, 0.4, 1) 240ms forwards;
+}
+
+@keyframes jar-rises {
+  0%   { opacity: 0; transform: translate(-50%, 34%) scale(0.66); }
+  30%  { opacity: 1; }
+  100% { opacity: 1; transform: translate(-50%, -52%) scale(1); }
+}
+
+.boxbody {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  transform: translateX(-50%);
+  z-index: 3;
+  width: 13rem;
+  height: 7rem;
+  background: linear-gradient(168deg, var(--card-face), color-mix(in srgb, var(--card-face) 80%, #000 6%));
+  border: 2px solid var(--card-edge);
+  border-radius: 2px 2px 6px 6px;
+}
+
+/* Tape down the middle. */
+.boxbody::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 0;
+  width: 3px;
+  height: 100%;
+  background: var(--card-seam);
+  transform: translateX(-50%);
+}
+
+/* Flaps start lying flat across the opening and swing outward on their outer
+   hinge, which is why each has its transform-origin on the far edge. */
+.box .flap {
+  position: absolute;
+  bottom: 6.9rem;
+  z-index: 1;
+  width: 6.4rem;
+  height: 0.75rem;
+  background: var(--card-flap);
+  border: 2px solid var(--card-edge);
+}
+
+.box .flap.left {
+  left: calc(50% - 6.5rem);
+  transform-origin: left center;
+}
+
+.box .flap.right {
+  left: calc(50% + 0.1rem);
+  transform-origin: right center;
+}
+
+.boxscene.opening .flap.left {
+  animation: flap-left 360ms cubic-bezier(0.4, 0, 0.3, 1) forwards;
+}
+
+.boxscene.opening .flap.right {
+  animation: flap-right 360ms cubic-bezier(0.4, 0, 0.3, 1) forwards;
+}
+
+/* The shipping label you write the jar's name on. Taped on slightly crooked,
+   because a perfectly square label looks printed rather than stuck on. */
+.scribble {
+  font-family: var(--hand);
+  font-size: 0.92rem;
+  line-height: 1.1;
+  /* An input carries an intrinsic width from its `size` attribute, which will
+     push its container wider than the label unless this is cleared. */
+  min-width: 0;
+  max-width: 100%;
+  /* The live input can't wrap, but the written-on label can. */
+  white-space: normal;
+  overflow-wrap: anywhere;
+  color: color-mix(in srgb, var(--ink) 85%, #000);
+  text-align: center;
+  width: 100%;
+  background: none;
+  border: 0;
+  outline: none;
+  padding: 0;
+}
+
+.scribble::placeholder { color: color-mix(in srgb, var(--ink) 32%, transparent); }
+
+.boxhint {
+  margin: 0.6rem 0 0;
+  font-size: 1.04rem;
+  color: var(--ink-soft);
+  text-align: center;
+}
+
+@keyframes flap-left {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(-118deg); }
+}
+
+@keyframes flap-right {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(118deg); }
+}
+
+/* ---------- a deleted jar is thrown into the recycling ---------- */
+
+.throwscene {
+  position: fixed;
+  inset: 0;
+  z-index: 26;
+  background: var(--paper);
+  animation: scene-out 180ms ease 760ms forwards;
+}
+
+/* An arc, not a straight line — the jar is lobbed, so it rises before it
+   drops, and tumbles on the way. */
+.flyingjar {
+  position: absolute;
+  left: 50%;
+  top: 34%;
+  display: block;
+  width: 7rem;
+  animation: lob 760ms cubic-bezier(0.4, 0, 0.75, 1) forwards;
+}
+
+@keyframes lob {
+  0%   { transform: translate(-50%, -50%) rotate(0) scale(1); opacity: 1; }
+  35%  { transform: translate(-30%, -135%) rotate(26deg) scale(0.86); opacity: 1; }
+  75%  { transform: translate(-6%, 40%) rotate(78deg) scale(0.52); opacity: 1; }
+  100% { transform: translate(0%, 150%) rotate(104deg) scale(0.3); opacity: 0; }
+}
+
+.bin {
+  position: absolute;
+  left: 50%;
+  bottom: 3rem;
+  transform: translateX(-50%);
+  width: 9rem;
+}
+
+/* A tapered tub — wider at the rim than the base. */
+.binbody {
+  position: relative;
+  height: 6.2rem;
+  background: linear-gradient(170deg, var(--bin-body), color-mix(in srgb, var(--bin-body) 78%, #000 8%));
+  border: 2px solid var(--bin-edge);
+  border-radius: 3px 3px 10px 10px;
+  clip-path: polygon(0% 0%, 100% 0%, 88% 100%, 12% 100%);
+  display: grid;
+  place-items: center;
+}
+
+.recycle {
+  font-size: 2.4rem;
+  color: color-mix(in srgb, var(--bin-edge) 70%, transparent);
+  line-height: 1;
+}
+
+.binlid {
+  height: 0.85rem;
+  margin-bottom: 0.15rem;
+  background: var(--bin-lid);
+  border: 2px solid var(--bin-edge);
+  border-radius: 4px;
+  transform-origin: left center;
+  animation: lid-flap 760ms ease-in-out forwards;
+}
+
+/* The lid tips open as the jar arrives and falls shut behind it. */
+@keyframes lid-flap {
+  0%   { transform: rotate(0deg); }
+  45%  { transform: rotate(-36deg); }
+  82%  { transform: rotate(-36deg); }
+  100% { transform: rotate(0deg); }
+}
+
+/* ---------- the recycling bin is its own room ---------- */
+
+body[data-room="recycling"] { background: #e9f0ea; }
+
+/* Re-pointing --paper and --ink is enough to recolour everything inside:
+   --ink-soft and --ink-faint are `color-mix()` token lists, and custom
+   properties substitute lazily, so they re-resolve against these values. */
+.recycleroom {
+  --paper: #e9f0ea;
+  --ink: #425a49;
+  --danger: #8a6a5a;
+  color: var(--ink);
+}
+
+.recycleroom .primary { background: var(--bin-lid); border-color: var(--bin-edge); color: #f4f8f4; }
+
+/* Jars in the bin aren't on a shelf, so no planks. */
+.shelf.bare {
+  background-image: none;
+  grid-auto-rows: auto;
+  row-gap: 1.6rem;
+  column-gap: 0.4rem;
+}
+
+.shelf.bare li { padding-bottom: 0; }
+.shelf.bare li::before { display: none; }
+
+/* Without a plank to sit under, the count goes back in the normal flow. */
+.shelf.bare .jarcount {
+  position: static;
+  margin-top: 0.15rem;
+}
+
+/* ---------- messages ---------- */
+
+.empty { text-align: center; padding: 3rem 1rem; color: var(--ink-soft); }
+.empty .big { font-family: var(--display); font-style: italic; font-size: 1.4rem; color: var(--ink); margin: 0 0 0.6rem; }
+.empty p { line-height: 1.6; margin: 0; }
+
+.nudge, .problem {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 0.8rem;
+  align-items: center;
+  justify-content: space-between;
+  border-radius: var(--radius);
+  padding: 0.7rem 0.95rem;
+  font-size: 1.04rem;
+  line-height: 1.45;
+}
+
+.nudge { background: var(--ink-faint); margin-bottom: 1.1rem; }
+
+.problem {
+  background: color-mix(in srgb, var(--danger) 14%, var(--paper));
+  color: color-mix(in srgb, var(--danger) 80%, var(--ink));
+  margin: 0.8rem auto 0;
+  max-width: 34rem;
+  width: calc(100% - 2.3rem);
+}
+
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: calc(1.2rem + env(safe-area-inset-bottom));
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  background: var(--ink);
+  color: var(--paper);
+  padding: 0.6rem 0.8rem 0.6rem 1.1rem;
+  border-radius: 999px;
+  font-size: 1.06rem;
+  box-shadow: 0 10px 26px -14px color-mix(in srgb, var(--ink) 80%, transparent);
+  z-index: 30;
+  animation: rise 220ms ease-out both;
+}
+
+.toast .link { color: var(--note); }
+.toast .link:hover { color: var(--paper); }
+
+@keyframes rise {
+  from { transform: translate(-50%, 14px); opacity: 0; }
+  to   { transform: translate(-50%, 0); opacity: 1; }
+}
+
+/* ---------- panels ---------- */
+
+.panel { margin: 0 0 2.2rem; }
+.panel h2 { font-family: var(--display); font-style: italic; font-weight: 400; font-size: 1.15rem; margin: 0 0 0.5rem; }
+.muted { color: var(--ink-soft); line-height: 1.6; font-size: 1.08rem; margin: 0 0 0.8rem; }
+.muted.small { font-size: 0.98rem; }
+.ok { color: var(--ink); font-size: 0.86rem; }
+
+.shelffoot { text-align: center; margin: 1.4rem 0 0; font-size: 1.02rem; }
+.muted.center { text-align: center; }
+
+/* A recycled jar is shown faded, with its own put-back control. */
+.jarcard.recycled { cursor: default; opacity: 0.72; }
+.jarcard.recycled:hover { background: none; transform: none; }
+
+.binlist { list-style: none; margin: 0; padding: 0; }
+.binlist li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.8rem;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid var(--ink-faint);
+}
+
+.bintext { font-family: var(--display); font-size: 1.14rem; line-height: 1.45; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 1ms !important; transition-duration: 1ms !important; }
+}

@@ -1,0 +1,6 @@
+/target
+/web/dist
+.DS_Store
+
+# brainstorming / planning docs stay local
+/docs/superpowers/

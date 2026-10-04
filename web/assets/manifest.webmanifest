@@ -1,0 +1,16 @@
+{
+  "name": "jars",
+  "short_name": "jars",
+  "description": "A todo list you don't get to choose from. Fold ideas into a jar, then draw one at random.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#FAFBF8",
+  "theme_color": "#FAFBF8",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

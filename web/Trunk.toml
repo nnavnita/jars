@@ -1,0 +1,14 @@
+[build]
+target = "index.html"
+dist = "dist"
+
+[serve]
+port = 8080
+open = false
+
+# wasm-opt shrinks the bundle hard; -Oz matters more than speed here because the
+# scene is a handful of drawImage calls per frame, not heavy compute.
+[[hooks]]
+stage = "build"
+command = "sh"
+command_arguments = ["-c", "echo 'building jars'"]
